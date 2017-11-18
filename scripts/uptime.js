@@ -1,19 +1,21 @@
 const isReachable = require("is-reachable");
+const CronJob = require('cron').CronJob;
 const SITES = require("../config/config.js")
 const ROOM = "web-admin";
 
 
 module.exports = function(bot) {
-	
-	checkSites(SITES);
+	const tz = "Europe/Oslo";
+	new CronJob('* * * * *', checkSites, null, true, tz)
+	//checkSites(SITES);
 
 	bot.hear(/check/i, (res) => {
 		res.send(`Sjekker ${SITES.length} side(r)`);
-		checkSites(SITES);
+		checkSites();
 	})
 
-	function checkSites(sites) {
-		sites.forEach(site => {
+	function checkSites() {
+		SITES.forEach(site => {
 			isReachable(site).then(reachable => {
 				const now = new Date()
 				if(reachable) {
