@@ -26,7 +26,11 @@ module.exports = function(bot) {
 
 	bot.respond(/which sites/i, (res) => {
 		res.send(`Overvåker følgende sider: ${ config.sites.join(", ") }`)
-	})
+	});
+
+	bot.respond(/status/i, (res) => {
+		res.send(`Redis success: ${bot.brain.get("success")}`)
+	});
 
 	function checkSites(checkByCommand) {
 		config.sites.forEach(site => {
