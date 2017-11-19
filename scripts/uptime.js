@@ -36,12 +36,12 @@ module.exports = function(bot) {
 				if(reachable) {
 					
 					if(checkByCommand) {
-						bot.messageRoom(ROOM, `${site} is online at ${now}`);
+						bot.messageRoom(ROOM, `:white_check_mark: ${site} is online at ${now}`);
 						return;
 					}
 
 					if(successFull >= 60) {
-						bot.messageRoom(ROOM, `${site} is online at ${now} and has been online for 60 minutes`);
+						bot.messageRoom(ROOM, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
 						bot.brain.set("success", 0)
 					} else {
 						bot.brain.set("success", successFull++);
