@@ -11,15 +11,21 @@ module.exports = function(bot) {
 
 	bot.hear(/check/i, (res) => {
 		res.send(`Sjekker ${SITES.length} side(r)`);
-		checkSites();
+		checkSites(true);
 	})
 
-	function checkSites() {
+	function checkSites(checkByCommand) {
 		SITES.forEach(site => {
 			isReachable(site).then(reachable => {
 				const now = new Date()
 				const successFull = bot.brain.get("success");
-				if(reachable ) {
+				if(reachable) {
+					
+					if(checkByCommand) {
+						bot.messageRoom(ROOM, `${site} is online at ${now} and has been online for 60 minutes`);
+						return;
+					}
+
 					if(successFull >= 60) {
 						bot.messageRoom(ROOM, `${site} is online at ${now} and has been online for 60 minutes`);
 						bot.brain.set("success", 0)
