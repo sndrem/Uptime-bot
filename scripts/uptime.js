@@ -29,7 +29,11 @@ module.exports = function(bot) {
 	});
 
 	bot.respond(/status/i, (res) => {
-		res.send(`Redis success: ${bot.brain.get("success")}`)
+		res.send(`Redis success: ${bot.brain.get("test")}`)
+	});
+
+	bot.hear(/test/i, (res) => {
+		bot.brain.set("test", "added something")
 	});
 
 	function checkSites(checkByCommand) {
