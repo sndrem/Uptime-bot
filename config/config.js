@@ -1,5 +1,5 @@
 config = {
-	sites: ["http://mathopen.no", "http://moldeklev.no"],
+	sites: [],
 	webAdminSlackName: "@sndrem",
 	slackRoom: "web-admin"
 }

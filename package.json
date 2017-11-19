@@ -5,7 +5,7 @@
   "author": "Sindre <sndrem@live.no>",
   "description": "Checks if your sites are down",
   "scripts": {
-    "start": "./bin/hubot --adapter slack"
+    "start": "./bin/hubot"
   },
   "dependencies": {
     "cron": "^1.3.0",

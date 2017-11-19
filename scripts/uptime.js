@@ -18,40 +18,65 @@ module.exports = function(bot) {
 	const tz = "Europe/Oslo";
 	new CronJob('* * * * *', checkSites, null, true, tz)
 
+	bot.brain.set("sites", config.sites || []);
+
 	bot.hear(/check/i, (res) => {
-		res.send(`Sjekker ${config.sites.length > 1 ? config.sites.length + ' sider' : config.sites.length + ' side'}`);
+		const sites = bot.brain.get("sites") || [];
+		console.log("Check sitenumbers: " + sites);
+		if(sites.length === 0) {
+			res.send("Det er ingen sider i databasen som skal sjekkes. Legg til en side med kommandoen add <url>");
+			return;
+		} 
+		res.send(`Sjekker ${sites.length > 1 ? sites.length + ' sider' : sites.length + ' side'}`);
 		checkSites(true);
 	});
 
-	bot.respond(/which sites/i, (res) => {
-		res.send(`Overvåker følgende sider: ${ config.sites.join(", ") }`)
+	bot.respond(/(which sites|ws)/i, (res) => {
+		res.send(`Overvåker følgende sider: ${ bot.brain.get("sites").length > 0 ? bot.brain.get("sites").join(", ") : "Ingen. Legg til en side med kommandoen add <url>" }`)
 	});
 
+	bot.respond(/add (.*)/i, (res) => {
+		if(res.match[1]) {
+			const url = res.match[1];
+			let sites = bot.brain.get("sites");
+			sites.push(url);
+			bot.brain.set("sites", sites);
+			res.send(`La til ${url}. Overvåker nå: ${sites.map(site => `${site}\n`)}`);
+		} else {
+			res.send(`Vennligst oppgi en url jeg skal overvåke.`)
+		}
+	})
+
 	function checkSites(checkByCommand) {
-		config.sites.forEach(site => {
-			isReachable(site, {timeout: 15000}).then(reachable => {
-				const now = new Date()
-				let successFull = bot.brain.get("success");
-				if(reachable) {
-					
-					if(checkByCommand) {
-						bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now}`);
-						return;
-					}
+		const sites = bot.brain.get("sites");
+		if(sites.length <= 0) {
+			bot.messageRoom(config.slackRoom, "Det er ingen sider i databasen som skal sjekkes.")
+		} else {
+			sites.forEach(site => {
+				isReachable(site, {timeout: 15000}).then(reachable => {
+					const now = new Date()
+					let successFull = bot.brain.get("success");
+					if(reachable) {
+						
+						if(checkByCommand) {
+							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now}`);
+							return;
+						}
 
-					if(successFull >= 60) {
-						bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
-						bot.brain.set("success", 0)
+						if(successFull >= 60) {
+							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
+							bot.brain.set("success", 0)
+						} else {
+							bot.brain.set("success", successFull++);
+						}
+
 					} else {
-						bot.brain.set("success", successFull++);
+						bot.messageRoom(config.slackRoom, `${config.webAdminSlackName} :fire: ${site} is offline at ${now}. You should probably check it out :fire:`);
+						bot.brain.set("success", 0);
 					}
-
-				} else {
-					bot.messageRoom(config.slackRoom, `${config.webAdminSlackName} :fire: ${site} is offline at ${now}. You should probably check it out :fire:`);
-					bot.brain.set("success", 0);
-				}
-			})
-		});
+				})
+			});
+		}
 	}
 }
 
