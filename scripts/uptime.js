@@ -32,7 +32,7 @@ module.exports = function(bot) {
 	});
 
 	bot.respond(/(which sites|ws)/i, (res) => {
-		res.send(`Overvåker følgende sider: ${ bot.brain.get("sites").length > 0 ? bot.brain.get("sites").join(", ") : "Ingen. Legg til en side med kommandoen add <url>" }`)
+		res.send(`Overvåker følgende sider: ${ bot.brain.get("sites") !== undefined ? bot.brain.get("sites").join(", ") : "Ingen. Legg til en side med kommandoen add <url>" }`)
 	});
 
 	bot.respond(/add (.*)/i, (res) => {
