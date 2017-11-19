@@ -12,7 +12,6 @@
 const isReachable = require("is-reachable");
 const CronJob = require('cron').CronJob;
 const config = require("../config/config.js")
-const ROOM = "web-admin";
 
 
 module.exports = function(bot) {
@@ -28,35 +27,27 @@ module.exports = function(bot) {
 		res.send(`Overvåker følgende sider: ${ config.sites.join(", ") }`)
 	});
 
-	bot.respond(/status/i, (res) => {
-		res.send(`Redis success: ${bot.brain.get("test")}`)
-	});
-
-	bot.hear(/test/i, (res) => {
-		bot.brain.set("test", "added something")
-	});
-
 	function checkSites(checkByCommand) {
 		config.sites.forEach(site => {
-			isReachable(site, {timeout: 10000}).then(reachable => {
+			isReachable(site, {timeout: 15000}).then(reachable => {
 				const now = new Date()
 				let successFull = bot.brain.get("success");
 				if(reachable) {
 					
 					if(checkByCommand) {
-						bot.messageRoom(ROOM, `:white_check_mark: ${site} is online at ${now}`);
+						bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now}`);
 						return;
 					}
 
 					if(successFull >= 60) {
-						bot.messageRoom(ROOM, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
+						bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
 						bot.brain.set("success", 0)
 					} else {
 						bot.brain.set("success", successFull++);
 					}
 
 				} else {
-					bot.messageRoom(ROOM, `${config.webAdminSlackName} :fire: ${site} is offline at ${now}. You should probably check it out :fire:`);
+					bot.messageRoom(config.slackRoom, `${config.webAdminSlackName} :fire: ${site} is offline at ${now}. You should probably check it out :fire:`);
 					bot.brain.set("success", 0);
 				}
 			})
