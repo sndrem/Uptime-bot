@@ -18,15 +18,13 @@ module.exports = function(bot) {
 	const tz = "Europe/Oslo";
 	new CronJob('* * * * *', checkSites, null, true, tz)
 
+	// Need this callback otherwise the brain is wiped before responses start ticking in
 	bot.brain.on("connected", () => {
-		console.log("Setting sites", config.sites);
 		bot.brain.set("sites", config.sites || []);
-		console.log("Sites set: ", bot.brain.get("sites"));	
 	});
 
 	bot.hear(/check/i, (res) => {
 		const sites = bot.brain.get("sites") || [];
-		console.log("Check sitenumbers: " + sites);
 		if(sites.length === 0) {
 			res.send("Det er ingen sider i databasen som skal sjekkes. Legg til en side med kommandoen add <url>");
 			return;
@@ -42,14 +40,31 @@ module.exports = function(bot) {
 	bot.respond(/add (.*)/i, (res) => {
 		if(res.match[1]) {
 			const url = res.match[1];
-
 			let sites = bot.brain.get("sites");
-			console.log("Sites after add", sites);
 			sites.push(url);
 			bot.brain.set("sites", sites);
-			res.send(`La til ${url}. Overvåker nå: ${sites.map(site => `${site}\n`)}`);
+			res.send(`La til ${url}.\nOvervåker nå: ${sites.map(site => `${site}\n`)}`);
 		} else {
 			res.send(`Vennligst oppgi en url jeg skal overvåke.`)
+		}
+	});
+
+	bot.respond(/del (.*)/i, (res) => {
+		if(res.match[1]) {
+			const url = res.match[1];
+			let sites = bot.brain.get("sites");
+			let siteToDelete = sites.find(s => s === url);
+			if(siteToDelete) {
+				const updatedSites = sites.filter(s => s !== url);
+				bot.brain.set("sites", updatedSites);
+				res.send(`${url} er nå fjernet fra databasen. Overvåker nå ${updatedSites.join(", ")}`)	
+			} else {
+				res.send(`Fant ingen sider med url: ${url}. Enten eksisterer den ikke, eller så har du skrevet feil url.
+					Jeg overvåker foreløpig følgende sider: ${sites.join(", ")}`);
+			}
+			
+		} else {
+			res.send("Vennligst oppgi en url jeg skal slutte å følge.")
 		}
 	})
 
@@ -65,19 +80,19 @@ module.exports = function(bot) {
 					if(reachable) {
 						
 						if(checkByCommand) {
-							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now}`);
+							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} er online: ${now}`);
 							return;
 						}
 
 						if(successFull >= 60) {
-							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} is online at ${now} and has been online for 60 minutes`);
+							bot.messageRoom(config.slackRoom, `:white_check_mark: ${site} er online: ${now} and har vært online i 60 minutter`);
 							bot.brain.set("success", 0)
 						} else {
 							bot.brain.set("success", successFull++);
 						}
 
 					} else {
-						bot.messageRoom(config.slackRoom, `${config.webAdminSlackName} :fire: ${site} is offline at ${now}. You should probably check it out :fire:`);
+						bot.messageRoom(config.slackRoom, `${config.webAdminSlackName} :fire: ${site} er offline: ${now}. Du bør finne ut hvorfor :fire:`);
 						bot.brain.set("success", 0);
 					}
 				})
