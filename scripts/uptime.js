@@ -18,8 +18,10 @@ module.exports = function(bot) {
 	const tz = "Europe/Oslo";
 	new CronJob('* * * * *', checkSites, null, true, tz)
 
+	console.log("Setting sites", config.sites);
 	bot.brain.set("sites", config.sites || []);
-
+	console.log("Sites set: ", bot.brain.get("sites"));
+	
 	bot.hear(/check/i, (res) => {
 		const sites = bot.brain.get("sites") || [];
 		console.log("Check sitenumbers: " + sites);
