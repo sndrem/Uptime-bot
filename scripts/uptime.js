@@ -21,7 +21,7 @@ module.exports = function(bot) {
 	console.log("Setting sites", config.sites);
 	bot.brain.set("sites", config.sites || []);
 	console.log("Sites set: ", bot.brain.get("sites"));
-	
+
 	bot.hear(/check/i, (res) => {
 		const sites = bot.brain.get("sites") || [];
 		console.log("Check sitenumbers: " + sites);
@@ -41,6 +41,7 @@ module.exports = function(bot) {
 		if(res.match[1]) {
 			const url = res.match[1];
 			let sites = bot.brain.get("sites");
+			console.log("Sites after add", sites);
 			sites.push(url);
 			bot.brain.set("sites", sites);
 			res.send(`La til ${url}. Overvåker nå: ${sites.map(site => `${site}\n`)}`);
