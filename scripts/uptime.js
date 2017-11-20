@@ -69,12 +69,12 @@ module.exports = function(bot) {
 	});
 
 	bot.respond(/sonos say (.*)/i, (res) => {
-		bot.http(`http://192.168.1.61:5005/stue/say/${res.match[1]}`).get((err, response, body) => {
+		bot.http(`http://192.168.1.61:5005/stue/say/${res.match[1]}`).get()(function(err, response, body){
 			console.log("Error", err);
 			console.log("res", response);
 			console.log("Body", body);
 			res.send("Should say something");
-		})
+		});
 	})
 
 	function checkSites(checkByCommand) {
