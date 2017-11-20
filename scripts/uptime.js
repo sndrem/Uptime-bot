@@ -73,7 +73,7 @@ module.exports = function(bot) {
 			console.log("Error", err);
 			console.log("res", response);
 			console.log("Body", body);
-			res.send(body);
+			res.send("Should say something");
 		})
 	})
 
