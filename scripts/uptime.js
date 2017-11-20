@@ -70,6 +70,9 @@ module.exports = function(bot) {
 
 	bot.respond(/sonos say (.*)/i, (res) => {
 		bot.http(`http://192.168.1.61:5005/stue/say/${res.match[1]}`).get((err, res, body) => {
+			console.log("Error", err);
+			console.log("res", res);
+			console.log("Body", body);
 			res.send(body);
 		})
 	})
