@@ -12,6 +12,7 @@
 const isReachable = require("is-reachable");
 const CronJob = require('cron').CronJob;
 const config = require("../config/config.js")
+const skyss = require("../tools/skyss.js");
 
 
 module.exports = function(bot) {
@@ -69,12 +70,30 @@ module.exports = function(bot) {
 	});
 
 	bot.respond(/sonos say (.*)/i, (res) => {
-		bot.http(`http://192.168.1.61:5005/sayall/${res.match[1]}/nb-no/40`).get()(function(err, response, body){
+		const command = res.match[1];
+		talkViaSonos(bot, command)
+		// bot.http(`http://192.168.1.61:5005/sayall/${res.match[1]}/nb-no/40`).get()(function(err, response, body){
+		// 	if(err) {
+		// 		res.send(`Jeg kunne dessverre ikke si ${res.match[1]}`);
+		// 	}
+		// });
+	});
+
+	bot.respond(/(neste bybane|nbb)/i, (res) => {
+		skyss.getNextBybane().then(data => {
+			talkViaSonos(bot, `Neste bybane går klokken ${data}`);
+		})
+	})
+
+	function talkViaSonos(bot, command) {
+		bot.http(`http://192.168.1.61:5005/sayall/${command}/nb-no/40`).get()(function(err, response, body){
 			if(err) {
 				res.send(`Jeg kunne dessverre ikke si ${res.match[1]}`);
 			}
 		});
-	})
+	}
+
+
 
 	function checkSites(checkByCommand) {
 		const sites = bot.brain.get("sites");
