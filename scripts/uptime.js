@@ -13,6 +13,7 @@ const isReachable = require("is-reachable");
 const CronJob = require('cron').CronJob;
 const config = require("../config/config.js")
 const skyss = require("../tools/skyss.js");
+const moment = require("moment");
 
 
 module.exports = function(bot) {
@@ -72,17 +73,15 @@ module.exports = function(bot) {
 	bot.respond(/sonos say (.*)/i, (res) => {
 		const command = res.match[1];
 		talkViaSonos(bot, command)
-		// bot.http(`http://192.168.1.61:5005/sayall/${res.match[1]}/nb-no/40`).get()(function(err, response, body){
-		// 	if(err) {
-		// 		res.send(`Jeg kunne dessverre ikke si ${res.match[1]}`);
-		// 	}
-		// });
 	});
 
 	bot.respond(/(neste bybane|nbb)/i, (res) => {
+		res.send("Finner ut når neste bybane går.")
 		skyss.getNextBybane().then(data => {
-			talkViaSonos(bot, `Neste bybane går klokken ${data}`);
-		})
+			const now = moment().format("HH:mm")
+			talkViaSonos(bot, `Klokken er nå ${now}. Neste bybane går klokken ${data}`);
+			res.send(`Klokken er nå ${now}. Neste bybane går kl. ${data} fra Brann Stadion til Byparken.`);
+		});
 	})
 
 	function talkViaSonos(bot, command) {
