@@ -3,7 +3,6 @@ const cheerio 	= require("cheerio");
 const moment 	= require("moment");
 
 
-
 const skyssService = {
 
 	getNextBybane: function() {
@@ -20,16 +19,24 @@ const skyssService = {
 			const $cheerio = cheerio.load(body);
 			const times = new Array();
 			$cheerio(".tm-result-header .tm-result-time").each((index, header) => {
-					const resultTime = $cheerio(header).children().first();
-					const time = $cheerio(resultTime).children().last().text();
-					times.push(time);
+					const startTime = $cheerio(header).children().first();
+					const endTime = $cheerio(header).children().last();
+
+					const aTime = $cheerio(startTime).children().last().text();
+					const bTime = $cheerio(endTime).children().last().text();
+					times.push({
+						start: aTime,
+						end: bTime
+					});
 				});
-				resolve(times[0]);
+				resolve(times);
 			});
 		});
 	}
-
 }
+
+
+skyssService.getNextBybane().then(data => console.log(data));
 
 // date must have format: day.month.year (2017)
 // hour must have format: hour:minute

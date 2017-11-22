@@ -79,10 +79,20 @@ module.exports = function(bot) {
 		res.send("Finner ut når neste bybane går.")
 		skyss.getNextBybane().then(data => {
 			const now = moment().format("HH:mm")
-			talkViaSonos(bot, `Klokken er nå ${now}. Neste bybane går klokken ${data} fra Brann Stadion til Byparken.`);
-			res.send(`Klokken er nå ${now}. Neste bybane går kl. ${data} fra Brann Stadion til Byparken.`);
+			const startTime = data[0].start;
+			talkViaSonos(bot, `Klokken er nå ${now}. Neste bybane går klokken ${startTime} fra Brann Stadion til Byparken.`);
+			res.send(`Klokken er nå ${now}. Neste bybane går kl. ${startTime} fra Brann Stadion til Byparken.`);
 		});
-	})
+	});
+
+	bot.respond(/nosay (neste bybane|nbb)/i, (res) => {
+		res.send("Finner ut når neste bybane går.")
+		skyss.getNextBybane().then(data => {
+			const now = moment().format("HH:mm")
+			const startTime = data[0].start;
+			res.send(`Klokken er nå ${now}. Neste bybane går kl. ${startTime} fra Brann Stadion til Byparken.`);
+		});
+	});
 
 	function talkViaSonos(bot, command) {
 		bot.http(`http://192.168.1.61:5005/sayall/${command}/nb-no/40`).get()(function(err, response, body){
@@ -91,7 +101,6 @@ module.exports = function(bot) {
 			}
 		});
 	}
-
 
 
 	function checkSites(checkByCommand) {
