@@ -109,7 +109,7 @@ module.exports = function(bot) {
 			bot.messageRoom(config.slackRoom, "Det er ingen sider i databasen som skal sjekkes.")
 		} else {
 			sites.forEach(site => {
-				isReachable(site, {timeout: 60000}).then(reachable => {
+				isReachable(site, {timeout: 60000 * 3}).then(reachable => {
 					const now = new Date()
 					let successFull = bot.brain.get("success");
 					if(reachable) {
