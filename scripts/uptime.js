@@ -8,6 +8,9 @@
 // Commands:
 //	hubot which sites - Lists the sites you are currently wathing
 //	check - Runs a check on all sites you are monitoring
+//  hubot add <domain> - Adds <domain> to the sites to monitor and check
+// 	hubot del <domain> - Deletes <domain> from the monitored sites
+
 
 const isReachable = require("is-reachable");
 const CronJob = require('cron').CronJob;
